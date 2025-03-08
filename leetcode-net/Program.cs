@@ -1,7 +1,9 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
-using leetcode_net.Problem.p2523;
+// using leetcode_net.Problem....;
 
-var solution = new Solution();
+Console.WriteLine("I'm here");
 
-Console.WriteLine(String.Join(",", solution.ClosestPrimes(1, 1000000)));
+// var solution = new Solution();
+
+// code here to debug solution is working
