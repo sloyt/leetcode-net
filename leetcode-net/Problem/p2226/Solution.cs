@@ -2,74 +2,37 @@ namespace leetcode_net.Problem.p2226;
 
 public class Solution
 {
-    public int MaximumCandies(int[] candies, long k)
-    {
-        int min = 0;
+    public int MaximumCandies(int[] candies, long k) {
+        int min = 1;
         int max = candies.Max();
 
         int result = 0;
+        
+        while (min <= max) {
+            int median = min + (max - min) / 2;
 
-        // check if we can get k piles with median
-
-        while (true)
-        {
-            int median = (min + max) / 2;
-
-            if (CanGetPiles(candies, k, median))
-            {
+            if (CanAllocateCandies(candies, median, k)) {
                 result = median;
-
-                if (min != median)
-                {
-                    min = median;
-                }
-                else if (min != max)
-                {
-                    min += 1;
-                }
-                else
-                {
-                    break;
-                }
+                min = median + 1;
             }
             else
             {
-                if (max != median)
-                {
-                    max = median;
-                }
-                else
-                {
-                    break;
-                }
+                max = median - 1;
             }
         }
-
+        
         return result;
     }
 
-    private bool CanGetPiles(int[] candies, long k, int median)
+    private bool CanAllocateCandies(int[] candies, int median, long k)
     {
-        if (median == 0) return true;
-        
-        long piles = 0;
+        long totalChildren = 0;
 
-        foreach (int num in candies)
+        foreach (int pile in candies)
         {
-            if (num >= median)
-            {
-                int mod = num;
-
-                do
-                {
-                    mod -= median;
-                    piles += 1;
-                } while (mod >= median && piles < k);
-            }
-
-            if (piles == k) break;
+            totalChildren += pile / median;
         }
 
-        return piles == k;
+        return totalChildren >= k;
     }
 }
