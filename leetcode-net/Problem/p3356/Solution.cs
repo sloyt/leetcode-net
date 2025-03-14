@@ -4,40 +4,56 @@ public class Solution
 {
     public int MinZeroArray(int[] nums, int[][] queries)
     {
-        Dictionary<int, int> map = new Dictionary<int, int>();
-
-        for (int i = 0; i < nums.Length; i++)
+        int left = 0;
+        int right = queries.Length;
+        
+        int result = -1;
+        
+        while (left <= right)
         {
-            if (nums[i] > 0) map[i] = nums[i];
-        }
-
-        int currIndex = 0;
-        int maxSteps = map.Count > 0 ? -1 : 0;
-
-        for (; currIndex < queries.Length && maxSteps < 0; currIndex++)
-        {
-            for (int j = queries[currIndex][0]; j <= queries[currIndex][1]; j++)
+            int mid = left + (right - left) / 2;
+            
+            if (IsMakingZero(nums, queries, mid))
             {
-                if (map.ContainsKey(j))
-                {
-                    if (map[j] - queries[currIndex][2] > 0)
-                    {
-                        map[j] -= queries[currIndex][2];
-                    }
-                    else
-                    {
-                        map.Remove(j);
-                        maxSteps = currIndex + 1;
-                    }
-                }
+                result = mid;
+                right = mid - 1;
             }
-
-            if (maxSteps > 0 && map.Count > 0)
+            else
             {
-                maxSteps = -1;
+                left = mid + 1;
             }
         }
 
-        return maxSteps;
+        return result;
+    }
+    
+    bool IsMakingZero(int[] nums, int[][] queries, int k)
+    {
+        int n = nums.Length;
+        int[] diff = new int[n + 1];
+            
+        for (int i = 0; i < k; i++)
+        {
+            int li = queries[i][0];
+            int ri = queries[i][1];
+            int vali = queries[i][2];
+
+            diff[li] += vali;
+            
+            if (ri + 1 < n) diff[ri + 1] -= vali;
+        }
+
+        int currentDecrement = 0;
+        int[] current = (int[])nums.Clone();
+        
+        for (int i = 0; i < n; i++)
+        {
+            currentDecrement += diff[i];
+            current[i] -= currentDecrement;
+
+            if (current[i] > 0) return false;
+        }
+
+        return true;
     }
 }
