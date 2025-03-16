@@ -4,30 +4,48 @@ public class Solution
 {
     public int MinCapability(int[] nums, int k)
     {
-        int result = 0;
-
-        void Traverse(int i, int prevMax, int bufCount)
+        int left = 1;
+        int right = nums.Max();
+        
+        int result = right;
+        
+        while (left <= right)
         {
-            if (bufCount < k)
+            int median = left + (right - left) / 2;
+            
+            if (CanRobAtLeastKHouses(nums, median, k))
             {
-                for (int j = i + 2; j <= nums.Length - ((k - bufCount) * 2 - 1); j++)
-                {
-                    Traverse(j, nums[i] > prevMax ? nums[i] : prevMax, bufCount + 1);
-                }
+                result = median;
+                right = median - 1;
             }
             else
             {
-                int currMin = Math.Max(nums[i], prevMax);
-                
-                if (result == 0 || currMin < result) result = currMin;
+                left = median + 1;
             }
         }
-
-        for (int i = 0; i <= nums.Length - (k * 2 - 1); i++)
-        {
-            Traverse(i, 0, 1);
-        }
-
+        
         return result;
+    }
+    
+    private bool CanRobAtLeastKHouses(int[] nums, int cap, int k)
+    {
+        int count = 0;
+        int prev = -1;
+        
+        for (int i = 0; i < nums.Length; i++)
+        {
+            if (nums[i] <= cap && (prev < 0 || i - prev > 1))
+            {
+                count++;
+                prev = i;
+            }
+            
+            if (count >= k)
+            {
+                return true;
+            }
+        }
+        
+        return false;
     }
 }
