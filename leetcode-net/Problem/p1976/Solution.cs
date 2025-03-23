@@ -2,76 +2,69 @@ namespace leetcode_net.Problem.p1976;
 
 public class Solution
 {
-    class Node
-    {
-        public readonly int Value;
-        public readonly Dictionary<Node, int> Neighbors;
-
-        public Node(int value)
-        {
-            Value = value;
-            Neighbors = new Dictionary<Node, int>();
-        }
-
-        public void AddNeighbor(Node neighbor, int weight)
-        {
-            Neighbors.Add(neighbor, weight);
-        }
-    }
-    
     public readonly int Divider = (int)Math.Pow(10, 9) + 7; 
     
     public int CountPaths(int n, int[][] roads) {
         //
         // build graph
         
-        Dictionary<int, Node> nodes = Enumerable.Range(0, n)
-            .Select(x => (x, new Node(x)))
-            .ToDictionary();
+        int[][][] graph = new int[n][][];
 
         foreach (int[] road in roads)
         {
-            var node1 = nodes[road[0]];
-            var node2 = nodes[road[1]];
-
-            node1.AddNeighbor(node2, road[2]);
-            node2.AddNeighbor(node1, road[2]);
+            if (graph[road[0]] == default)
+            {
+                graph[road[0]] = [[road[1], road[2]]];
+            }
+            else
+            {
+                Array.Resize(ref graph[road[0]], graph[road[0]].Length + 1);
+                graph[road[0]][graph[road[0]].Length - 1] = [road[1], road[2]];
+            }
+            
+            if (graph[road[1]] == default)
+            {
+                graph[road[1]] = [[road[0], road[2]]];
+            }
+            else
+            {
+                Array.Resize(ref graph[road[1]], graph[road[1]].Length + 1);
+                graph[road[1]][graph[road[1]].Length - 1] = [road[0], road[2]];
+            }
         }
-
-        var root = nodes[0];
 
         // prepare variables
 
         int pathCount = 0;
         long maxTime = long.MaxValue;
-        
-        var visited = new HashSet<int>();
+
+        var visited = new int[n];
 
         // dfs algorithm
         
-        void Dfs(Node node, long time)
+        void Dfs(int nodeIndex, long time)
         {
-            visited.Add(node.Value);
+            visited[nodeIndex] = 1;
             
             // go deeper
 
-            foreach (KeyValuePair<Node, int> neighbor in node.Neighbors)
+            foreach (int[] neighbor in graph[nodeIndex])
             {
-                if (!visited.Contains(neighbor.Key.Value))
+                if (visited[neighbor[0]] == 0)
                 {
                     // check whether it is direct connection to final point
 
-                    if (neighbor.Key.Value == n - 1)
+                    if (neighbor[0] == n - 1)
                     {
                         // check timing to final point
 
-                        if (time + neighbor.Value == maxTime)
+                        if (time + neighbor[1] == maxTime)
                         {
                             pathCount = (pathCount + 1) % Divider;
                         }
-                        else if (time + neighbor.Value < maxTime)
+                        else if (time + neighbor[1] < maxTime)
                         {
-                            maxTime = time + neighbor.Value;
+                            maxTime = time + neighbor[1];
                             pathCount = 1;
                         }
                     }
@@ -79,21 +72,21 @@ public class Solution
                     {
                         // it is not direct connection
                         // check time would be less than maxTime
-                        if (time + neighbor.Value < maxTime)
+                        if (time + neighbor[1] < maxTime)
                         {
-                            Dfs(neighbor.Key, time + neighbor.Value);
+                            Dfs(neighbor[0], time + neighbor[1]);
                         }
                     }
                 }
             }
 
-            visited.Remove(node.Value);
+            visited[nodeIndex] = 0;
         }
 
         // run dfs
         
-        visited.Add(root.Value);
-        Dfs(root, 0);
+        visited[0] = 1;
+        Dfs(0, 0);
         
         // end
 
